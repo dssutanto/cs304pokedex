@@ -1,15 +1,4 @@
-<!--Test Oracle file for UBC CPSC304 2018 Winter Term 1
-  Created by Jiemin Zhang
-  Modified by Simona Radu
-  Modified by Jessica Wong (2018-06-22)
-  This file shows the very basics of how to execute PHP commands
-  on Oracle.  
-  Specifically, it will drop a table, create a table, insert values
-  update values, and then query for values
- 
-  IF YOU HAVE A TABLE CALLED "speciesTable" IT WILL BE DESTROYED
-
-  The script assumes you already have a server set up
+<!-- The script assumes you already have a server set up
   All OCI commands are commands to the Oracle libraries
   To get the file to work, you must place it somewhere where your
   Apache server can run it, and you must rename it to have a ".php"
@@ -18,7 +7,7 @@
 
 <html>
     <head>
-        <title>CPSC 304 PHP/Oracle Demonstration</title>
+        <title>Pokedex</title>
     </head>
 
     <body>
@@ -34,17 +23,17 @@
         <hr />
 
         <h2>Generate new Pokemon</h2>
-        <form method="POST" action="project.php"> <!--refresh page when submitted-->
+        <form method="POST" action="project.php">
             <input type="hidden" id="insertQueryRequest" name="insertQueryRequest">
             <!-- Number: <input type="text" name="insNo"> <br /><br />
             Name: <input type="text" name="insName"> <br /><br /> -->
 
             <input type="submit" value="Insert" name="insertSubmit"></p>
         </form>
-
+<!-- 
         <hr />
 
-        <!-- <h2>Update Name in speciesTable</h2>
+        <h2>Update Species Name in Species Table</h2>
         <p>The values are case sensitive and if you enter in the wrong case, the update statement will not do anything.</p>
 
         <form method="POST" action="project.php">
@@ -58,21 +47,57 @@
         <hr />
 
         <h2>Count the Tuples in Tables</h2>
-        <form method="GET" action="project.php"> <!--refresh page when submitted-->
+        <form method="GET" action="project.php">
             <input type="hidden" id="countTupleRequest" name="countTupleRequest">
             <input type="submit" name="countTuples"></p>
         </form>
 
         <hr />
 
-        <h2>Show the Tuples in Tables</h2>
-        <form method="GET" action="project.php"> <!--refresh page when submitted-->
-            <input type="hidden" id="showTupleRequest" name="showTupleRequest">
-            <input type="submit" name="showTuples"></p>
-        </form>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+            <?php
+                connectToDB();
+                $result = executePlainSQL("SELECT * FROM speciesTable");
 
+                if (($row = oci_fetch_row($result)) != false) {
+                    while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+                        echo "<tr><td>" . $row["SPID"] . "</td><td>" . $row["SPNAME"] . "</td></tr>";
+                    }
+                }
+            ?>
+        </table>
+
+        <table>
+            <tr>
+                <th>Species ID</th>
+                <th>Nickname</th>
+                <th>Gender</th>
+                <th>Weight</th>
+                <th>Friendship level</th>
+                <th>Time caught</th>
+            </tr>
+            <?php
+                connectToDB();
+                $result = executePlainSQL("SELECT * FROM pokemonTable");
+
+                if (($row = oci_fetch_row($result)) != false) {
+                    while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
+                        echo "<tr><td>" . $row["SPID"] . "</td><td><input type='text' onchange='updateNickname(this.value)' value='" . $row["NICKNAME"] . "'></td><td>" . $row["GENDER"] . "</td><td>" . $row["POKEMONWEIGHT"] . "</td><td>" . $row["FRIENDSHIPLEVEL"] . "</td><td>" . $row["TIMECAUGHT"] . "</td></tr>";
+                    }
+                }
+            ?>
+        </table>
+
+        <script>
+            function updateNickname(string) {
+
+            }
+        </script>
         <?php
-		//this tells the system that it's no longer just parsing html; it's now parsing PHP
 
         $success = True; //keep track of errors so it redirects the page only if there are no errors
         $db_conn = NULL; // edit the login credentials in connectToDB()
@@ -146,30 +171,6 @@
             }
         }
 
-        function printResultSp($result) { //prints results from a select statement
-            echo "<br>Retrieved data from table speciesTable:<br>";
-            echo "<table>";
-            echo "<tr><th>Species ID</th><th>Name</th></tr>";
-
-            while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-                echo "<tr><td>" . $row["SPID"] . "</td><td>" . $row["SPNAME"] . "</td></tr>"; //or just use "echo $row[0]" 
-            }
-
-            echo "</table>";
-        }
-
-        function printResultPm($result) { //prints results from a select statement
-            echo "<br>Retrieved data from table pokemonTable:<br>";
-            echo "<table>";
-            echo "<tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Weight</th><th>Friendship level</th><th>Time caught</th></tr>";
-
-            while ($row = OCI_Fetch_Array($result, OCI_BOTH)) {
-                echo "<tr><td>" . $row["SPID"] . "</td><td>" . $row["NICKNAME"] . "</td><td>" . $row["GENDER"] . "</td><td>" . $row["POKEMONWEIGHT"] . "</td><td>" . $row["FRIENDSHIPLEVEL"] . "</td><td>" . $row["TIMECAUGHT"] . "</td></tr>";
-            }
-
-            echo "</table>";
-        }
-
         function connectToDB() {
             global $db_conn;
 
@@ -202,17 +203,17 @@
             $new_name = $_POST['newName'];
 
             // you need the wrap the old name and new name values with single quotations
-            executePlainSQL("UPDATE speciesTable SET name='" . $new_name . "' WHERE name='" . $old_name . "'");
+            executePlainSQL("UPDATE pokemonTable SET nickname='" . $new_name . "' WHERE nickname='" . $old_name . "'");
             OCICommit($db_conn);
         }
 
         function handleResetRequest() {
             global $db_conn;
-            // Drop old table
-            executePlainSQL("DROP TABLE speciesTable");
+            // Drop old tables
             executePlainSQL("DROP TABLE pokemonTable");
+            executePlainSQL("DROP TABLE speciesTable");
 
-            // Create new table
+            // Create new tables
             echo "<br> creating new table <br>";
             executePlainSQL("CREATE TABLE speciesTable (spid int, spName varchar(30), PRIMARY KEY (spid), UNIQUE (spName))");
             executePlainSQL("INSERT INTO speciesTable VALUES (1, 'Bulbasaur')");
@@ -222,7 +223,7 @@
             executePlainSQL("INSERT INTO speciesTable VALUES (5, 'Charmeleon')");
             executePlainSQL("INSERT INTO speciesTable VALUES (6, 'Charizard')");
 
-            executePlainSQL("CREATE TABLE pokemonTable (spid int, nickName varchar(30), gender varchar(30), pokemonWeight decimal(3, 1), friendshipLevel decimal(3, 2), timeCaught timestamp, PRIMARY KEY (timeCaught), CONSTRAINT FK_speciesID FOREIGN KEY (spid) REFERENCES speciesTable(spid))");
+            executePlainSQL("CREATE TABLE pokemonTable (spid int, nickname varchar(30), gender varchar(30), pokemonWeight decimal(3, 1), friendshipLevel decimal(3, 2), timeCaught timestamp, PRIMARY KEY (timeCaught), CONSTRAINT FK_speciesID FOREIGN KEY (spid) REFERENCES speciesTable(spid))");
             // executePlainSQL("CREATE TABLE statTable (hp int, attack int, spAttack int, defence int, spDefence int, speed int, increase varchar(30), decrease varchar(30))");
             OCICommit($db_conn);
         }
@@ -242,10 +243,8 @@
             
             $randomSpid = executePlainSQL("SELECT spid FROM (SELECT spid FROM speciesTable ORDER BY DBMS_RANDOM.RANDOM) WHERE rownum < 5");
             $randomSpidResult = OCI_Fetch_Array($randomSpid, OCI_BOTH);
-            // echo $randomSpidResult[0];
             $randomSpname = executePlainSQL("SELECT spName FROM speciesTable WHERE spid = $randomSpidResult[0]");
             $randomSpnameResult = OCI_Fetch_Array($randomSpname, OCI_BOTH);
-            // echo $randomSpnameResult[0];
             $newPokemon = executePlainSQL("INSERT INTO pokemonTable VALUES ($randomSpidResult[0], '$randomSpnameResult[0]', 'male', 30.3, 0.01, CURRENT_TIMESTAMP)");
             OCICommit($db_conn);
         }
@@ -264,59 +263,41 @@
             }
         }
 
-        function showTuples() {
-            global $db_conn;
-
-            $resultSp = executePlainSQL("SELECT * FROM speciesTable");
-
-            if (($row = oci_fetch_row($resultSp)) != false) {
-                printResultSp($resultSp);
-            }
-
-            $resultPm = executePlainSQL("SELECT * FROM pokemonTable");
-
-            if (($row = oci_fetch_row($resultPm)) != false) {
-                printResultPm($resultPm);
-            }
-        }
-
         // HANDLE ALL POST ROUTES
 	// A better coding practice is to have one method that reroutes your requests accordingly. It will make it easier to add/remove functionality.
-        function handlePOSTRequest() {
-            if (connectToDB()) {
-                if (array_key_exists('resetTablesRequest', $_POST)) {
-                    handleResetRequest();
-                } else if (array_key_exists('updateQueryRequest', $_POST)) {
-                    handleUpdateRequest();
-                } else if (array_key_exists('insertQueryRequest', $_POST)) {
-                    handleInsertRequest();
-                }
-
-                disconnectFromDB();
+    function handlePOSTRequest() {
+        if (connectToDB()) {
+            if (array_key_exists('resetTablesRequest', $_POST)) {
+                handleResetRequest();
+            } else if (array_key_exists('updateQueryRequest', $_POST)) {
+                handleUpdateRequest();
+            } else if (array_key_exists('insertQueryRequest', $_POST)) {
+                handleInsertRequest();
             }
+
+            disconnectFromDB();
         }
+    }
 
-        // HANDLE ALL GET ROUTES
-	// A better coding practice is to have one method that reroutes your requests accordingly. It will make it easier to add/remove functionality.
-        function handleGETRequest() {
-            if (connectToDB()) {
-                if (array_key_exists('countTuples', $_GET)) {
-                    handleCountRequest();
-                } else {
-                    showTuples();
-                }
-
-                disconnectFromDB();
+    // HANDLE ALL GET ROUTES
+// A better coding practice is to have one method that reroutes your requests accordingly. It will make it easier to add/remove functionality.
+    function handleGETRequest() {
+        if (connectToDB()) {
+            if (array_key_exists('countTuples', $_GET)) {
+                handleCountRequest();
+            } else if (array_key_exists('showTuples', $_GET)){
+                showTuples();
             }
-        }
 
-		if (isset($_POST['reset']) || isset($_POST['updateSubmit']) || isset($_POST['insertSubmit'])) {
-            handlePOSTRequest();
-        } else if (isset($_GET['countTupleRequest'])) {
-            handleGETRequest();
-        } else {
-            handleGETRequest();
+            disconnectFromDB();
         }
+    }
+
+    if (isset($_POST['reset']) || isset($_POST['updateSubmit']) || isset($_POST['insertSubmit'])) {
+        handlePOSTRequest();
+    } else if (isset($_GET['countTupleRequest']) || isset($_GET['showTupleRequest'])) {
+        handleGETRequest();
+    }
 		?>
 	</body>
 </html>
