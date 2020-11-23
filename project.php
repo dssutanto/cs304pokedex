@@ -206,6 +206,28 @@
             <input type="submit" value="Display Pokemon" name="displayPokemon">
         </form>
         </div>
+	      
+	<form method="POST" action="project.php">
+      <input type="hidden" id="sortPokemonRequest" name="sortPokemonRequest">
+      <label for="sortBy">Sort by</label>
+      <select id="sortBy" name="sortBy">
+        <option id="spid" value="spid">Species ID</option>
+        <option id="nickname" value="nickname">Nickname</option>
+        <option id="date" value="date">Day caught</option>
+      </select>
+      <input type="submit" value="Sort" name="sortPokemon">
+    </form>
+
+    <form method="POST" action="project.php">
+      <input type="hidden" id="groupPokemonRequest" name="groupPokemonRequest">
+      <label for="groupBy">See aggregates for</label>
+      <select id="groupBy" name="groupBy">
+        <option id="spid" value="spid">Species</option>
+        <option id="date" value="date">Days caught</option>
+        <option id="gender" value="gender">Gender</option>
+      </select>
+      <input type="submit" value="View" name="groupPokemon">
+    </form>
 
         <!-- release pokemon -->
         <form method="POST" action="project.php">
@@ -476,15 +498,14 @@
             global $db_conn;
 
             $res = executePlainSQL("SELECT * FROM Pokemon");
-            echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Time Caught</th><th>Owned ID</th><th>Edit</th></tr>";
+            echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Time Caught</th><th>Owned ID</th></tr>";
             while (($row = oci_fetch_row($res)) != false) {
               echo "<tr>
-              <td><form id='form-". $row[4] . "' method='POST' action='project.php'><input type='hidden' id='getThisPokemonRequest' name='getThisPokemonRequest'></form>" . $row[0] . "</td>
+              <td>" . $row[0] . "</td>
               <td>" . $row[1] . "</td>
               <td> " . $row[2] . "</td>
               <td>" . $row[3] . ".</td>
-              <td><input form='form-" . $row[4] . "' type='text' name='thisPokemonID' value='" . $row[4] . "'></td>
-              <td><input form='form-" . $row[4] . "' type='submit' value='Edit' name='getThisPokemon'></td>
+              <td>" . $row[4] . "'></td>
             </tr>";
             }
             echo "</table>";
@@ -571,18 +592,102 @@
           OCICommit($db_conn);
         }
 
-        function showThisPokemon() {
-            global $db_conn;
+        function sortPokemonBy()
+    {
+      global $db_conn;
 
-            $ownedID = $_POST['thisPokemonID'];
-            // echo $ownedID;
-            if (isset($_POST['thisPokemonID'])) {
-                $thisPokemon = executePlainSQL("SELECT * FROM Pokemon WHERE OwnedID='" . $ownedID . "'");
-                $thisPokemonResult = OCI_Fetch_Array($thisPokemon, OCI_BOTH);
-                echo $thisPokemonResult[0];
-            }
-            OCICommit($db_conn);
+      if (isset($_POST['sortBy'])) {
+        if ($_POST['sortBy'] = 'spid') {
+          $res = executePlainSQL("SELECT * FROM Pokemon ORDER BY ID");
+          echo $_POST['sortBy'];
+          echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Time Caught</th><th>Owned ID</th></tr>";
+          while (($row = oci_fetch_row($res)) != false) {
+            echo "<tr>
+                <td>" . $row[0] . "</td>
+                <td>" . $row[1] . "</td>
+                <td>" . $row[2] . "</td>
+                <td>" . $row[3] . "</td>
+                <td>" . $row[4] . "</td>
+              </tr>";
+          }
+          echo "</table>";
+        } else if ($_POST['sortBy'] = 'nickname') {
+          $res = executePlainSQL("SELECT * FROM Pokemon ORDER BY Nickname");
+          echo $_POST['sortBy'];
+          echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Time Caught</th><th>Owned ID</th></tr>";
+          while (($row = oci_fetch_row($res)) != false) {
+            echo "<tr>
+                  <td>" . $row[0] . "</td>
+                  <td>" . $row[1] . "</td>
+                  <td>" . $row[2] . "</td>
+                  <td>" . $row[3] . "</td>
+                  <td>" . $row[4] . "</td>
+                </tr>";
+          }
+          echo "</table>";
+        } else if ($_POST['sortBy'] = 'date') {
+          $res = executePlainSQL("SELECT * FROM Pokemon ORDER BY TimeCaught");
+          echo $_POST['sortBy'];
+          echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Time Caught</th><th>Owned ID</th></tr>";
+          while (($row = oci_fetch_row($res)) != false) {
+            echo "<tr>
+                <td>" . $row[0] . "</td>
+                <td>" . $row[1] . "</td>
+                <td>" . $row[2] . "</td>
+                <td>" . $row[3] . "</td>
+                <td>" . $row[4] . "</td>
+              </tr>";
+          }
+          echo "</table>";
         }
+      }
+
+      OCICommit($db_conn);
+    }
+
+    function groupPokemonBy()
+    {
+      global $db_conn;
+
+      if (isset($_POST['groupBy'])) {
+        if ($_POST['groupBy'] = 'spid') {
+          $res = executePlainSQL("SELECT ID, COUNT(*) FROM Pokemon GROUP BY ID");
+          echo $_POST['groupBy'];
+          echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Pokemon</th></tr>";
+          while (($row = oci_fetch_row($res)) != false) {
+            echo "<tr>
+                <td>" . $row[0] . "</td>
+                <td>" . $row[1] . "</td>
+              </tr>";
+          }
+          echo "</table>";
+        } else if ($_POST['groupBy'] = 'gender') {
+          $res = executePlainSQL("SELECT Gender, COUNT(*) FROM Pokemon GROUP BY Gender");
+          echo $_POST['groupBy'];
+          echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Gender</th><th>Pokemon</th></tr>";
+          while (($row = oci_fetch_row($res)) != false) {
+            echo "<tr>
+                  <td>" . $row[0] . "</td>
+                  <td>" . $row[1] . "</td>
+                </tr>";
+          }
+          echo "</table>";
+        } else if ($_POST['groupBy'] = 'date') {
+          $res = executePlainSQL("SELECT TimeCaught, COUNT(*) FROM Pokemon GROUP BY TimeCaught");
+          echo $_POST['groupBy'];
+          echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th><th>Time Caught</th><th>Pokemon</th></tr>";
+          while (($row = oci_fetch_row($res)) != false) {
+            echo "<tr>
+                <td>" . $row[0] . "</td>
+                <td>" . $row[1] . "</td>
+              </tr>";
+          }
+          echo "</table>";
+        }
+      }
+
+      OCICommit($db_conn);
+    }
 
 
         // HANDLE ALL POST ROUTES
@@ -603,8 +708,10 @@
                 searchID();
             } else if (array_key_exists('checkWeaknessRequest', $_POST)) {
                 checkWeak();
-            } else if (array_key_exists('getThisPokemon', $_POST)) {
-                showThisPokemon();
+            } else if (array_key_exists('sortPokemonRequest', $_POST)) {
+          	sortPokemonBy();
+            } else if (array_key_exists('groupPokemonRequest', $_POST)) {
+          	groupPokemonBy();
             }
 
             disconnectFromDB();
@@ -649,15 +756,13 @@
         }
     }
 
-    if (isset($_POST['reset']) || isset($_POST['updateSubmit']) || isset($_POST['insertSubmit'])|| isset($_POST['releaseSubmit']) || isset($_POST['searchSubmit']) || isset($_POST['searchIDSubmit']) || isset($_POST['checkWeakSubmit'])) {
+    if (isset($_POST['reset']) || isset($_POST['updateSubmit']) || isset($_POST['insertSubmit'])|| isset($_POST['releaseSubmit']) || isset($_POST['searchSubmit']) || isset($_POST['searchIDSubmit']) || isset($_POST['checkWeakSubmit']) || isset($_POST['sortPokemon']) || isset($_POST['groupPokemon'])) {
         handlePOSTRequest();
     } else if (isset($_GET['countTupleRequest']) || isset($_GET['showTupleRequest']) || isset($_GET['displayPokemonRequest'])) {
         handleGETRequest();
     } else if (isset($_GET['getNormalPokemon']) || isset($_GET['getGrassPokemon']) || isset($_GET['getFirePokemon']) || isset($_GET['getWaterPokemon']) || isset($_GET['getGroundPokemon']) || isset($_GET['getFlyingPokemon']) ||
       isset($_GET['getPoisonPokemon']) || isset($_GET['getFightingPokemon']) || isset($_GET['getBugPokemon']) || isset($_GET['getElectricPokemon']) || isset($_GET['getPsychicPokemon']) || isset($_GET['getFairyPokemon'])) {
         handleGETRequest();
-    } else if (isset($POST['getThisPokemonRequest'])) {
-        handlePOSTRequest();
     }
 		?>
   </div>
