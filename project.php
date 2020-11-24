@@ -907,7 +907,7 @@
     {
       global $db_conn;
 
-        $res = executePlainSQL("SELECT P.ID, MAX(G.GenderCount) FROM (SELECT SQP.ID, SQP.Gender, COUNT(*) AS GenderCount FROM Pokemon SQP GROUP BY SQP.ID, SQP.Gender) AS G GROUP BY G.ID");
+        $res = executePlainSQL("SELECT G.ID, G.Gender FROM (SELECT SQP.ID, SQP.Gender, COUNT(*) AS GenderCount FROM Pokemon SQP GROUP BY SQP.ID, SQP.Gender) G JOIN (SELECT G.ID, MAX(G.GenderCount) AS maxGenderCount FROM (SELECT SQP.ID, SQP.Gender, COUNT(*) AS GenderCount FROM Pokemon SQP GROUP BY SQP.ID, SQP.Gender) G GROUP BY G.ID) GC ON G.ID = GC.ID AND G.GenderCount = GC.MaxGenderCount");
         echo "<table><tr><th>ID</th><th>Gender</th></tr>";
         while (($row = oci_fetch_row($res)) != false) {
           echo "<tr>
