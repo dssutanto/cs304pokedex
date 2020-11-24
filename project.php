@@ -233,7 +233,7 @@
         <option id="atk" value="atk">Attack</option>
         <option id="def" value="def">Defence</option>
         <option id="spatk" value="spatk">Special attack</option>
-        <option id="spdef" value="spef">Special defence</option>
+        <option id="spdef" value="spdef">Special defence</option>
         <option id="speed" value="speed">Speed</option>
       </select>
       <label for="order">from</label>
@@ -258,19 +258,10 @@
       <input type="submit" value="View" name="groupPokemon">
     </form>
 
-    <form method="POST" action="project.php">
-      <input type="hidden" id="topStatsRequest" name="topStatsRequest">
-      <label for="stat">Get highest</label>
-      <select id="stat" name="stat">
-        <option id="atk" value="hp">HP</option>
-        <option id="atk" value="atk">Attack</option>
-        <option id="def" value="def">Defence</option>
-        <option id="spatk" value="spatk">Special attack</option>
-        <option id="spdef" value="spef">Special defence</option>
-        <option id="speed" value="speed">Speed</option>
-      </select>
-      <label>for each Pokemon</label>
-      <input type="submit" value="View" name="topStats">
+    <form method="GET" action="project.php">
+      <input type="hidden" id="aggrPokemonRequest" name="aggrPokemonRequest">
+      <label>Get the most common gender by Pokemon</label>
+      <input type="submit" value="Show" name="aggrPokemon">
     </form>
 
     <!-- release pokemon -->
@@ -636,7 +627,7 @@
         $cwpoke = executePlainSQL("SELECT P.ID, P.Nickname, O.Type1, O.Type2 FROM Pokemon P, ofType O WHERE P.OwnedID='" . $cwid . "' AND P.ID=O.ID");
         if (($row = oci_fetch_row($cwpoke)) != false) {
           echo "Checking " . $row[1] . "'s weaknesses...<br>";
-          $check;
+          // $check;
           if ($row[3] != NULL) {
             $check = executePlainSQL("SELECT * FROM WeakAgainst WHERE (Type1_TypeName='$row[2]' OR Type1_TypeName='$row[3]')");
           } else {
@@ -810,7 +801,7 @@
               </tr>";
             }
             echo "</table>";
-          } else if ($_POST['sortBy'] == 'Speed') {
+          } else if ($_POST['sortBy'] == 'speed') {
             $res = executePlainSQL("SELECT Pokemon.*, P_Stats.* FROM Pokemon LEFT JOIN P_Stats ON Pokemon.ID = P_Stats.ID ORDER BY P_Stats.Speed $order");
             echo "<table style='border-collapse:separate;border-spacing:20px 0px;'><tr><th>Species ID</th><th>Nickname</th><th>Gender</th><th>Time Caught</th><th>Owned ID</th><th>HP</th><th>Attack</th><th>Defence</th><th>Sp. attack</th><th>Sp. defence</th><th>Speed</th></tr>";
             while (($row = oci_fetch_row($res)) != false) {
@@ -912,6 +903,23 @@
       OCICommit($db_conn);
     }
 
+    function aggregateStats()
+    {
+      global $db_conn;
+
+        $res = executePlainSQL("SELECT P.ID, MAX(G.GenderCount) FROM (SELECT SQP.ID, SQP.Gender, COUNT(*) AS GenderCount FROM Pokemon SQP GROUP BY SQP.ID, SQP.Gender) AS G GROUP BY G.ID");
+        echo "<table><tr><th>ID</th><th>Gender</th></tr>";
+        while (($row = oci_fetch_row($res)) != false) {
+          echo "<tr>
+            <td>" . $row[0] . "</td>
+            <td>" . $row[1] . "</td>
+          </tr>";
+        }
+        echo "</table>";
+
+      OCICommit($db_conn);
+    }
+
 
     // HANDLE ALL POST ROUTES
     // A better coding practice is to have one method that reroutes your requests accordingly. It will make it easier to add/remove functionality.
@@ -951,6 +959,8 @@
           handleCountRequest();
         } else if (array_key_exists('displayPokemon', $_GET)) {
           displayPokemon();
+        } else if (array_key_exists('aggrPokemon', $_GET)) {
+          aggregateStats();
         } else if (array_key_exists('getNormal', $_GET)) {
           getElem("Normal");
         } else if (array_key_exists('getGrass', $_GET)) {
@@ -983,7 +993,7 @@
 
     if (isset($_POST['reset']) || isset($_POST['updateSubmit']) || isset($_POST['insertSubmit']) || isset($_POST['releaseSubmit']) || isset($_POST['searchSubmit']) || isset($_POST['searchIDSubmit']) || isset($_POST['checkWeakSubmit']) || isset($_POST['sortPokemon']) || isset($_POST['groupPokemon'])) {
       handlePOSTRequest();
-    } else if (isset($_GET['countTupleRequest']) || isset($_GET['showTupleRequest']) || isset($_GET['displayPokemonRequest'])) {
+    } else if (isset($_GET['countTupleRequest']) || isset($_GET['showTupleRequest']) || isset($_GET['displayPokemonRequest']) || isset($_GET['aggrPokemonRequest'])) {
       handleGETRequest();
     } else if (
       isset($_GET['getNormalPokemon']) || isset($_GET['getGrassPokemon']) || isset($_GET['getFirePokemon']) || isset($_GET['getWaterPokemon']) || isset($_GET['getGroundPokemon']) || isset($_GET['getFlyingPokemon']) ||
