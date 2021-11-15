@@ -153,9 +153,8 @@
 
 <body>
   <div id="wrapper">
-    <h1>CS304 POKEMON DATABASE</h1>
-
     <div class="left">
+      <h1>CS304 POKEMON DATABASE</h1>
       <h2>General</h2>
 
       <p>If you wish to reset the table press on the reset button. If this is the first time you're running this page, you MUST use reset</p>
