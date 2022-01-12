@@ -1,10 +1,10 @@
 <h1>Introduction</h1>
 ![ERD diagram](./Pokedex_ERD.drawio.png?raw=true)
-<p>This was my term project for CS 304: "Introduction to Databases". This project consists of a PHP file and SQL database. The project was deployed to a server on the Oracle Cloud service made available for use by UBC students.</p>
-<h1>Usage</h1>
-<h2>Setting up the database</h2>
-<p>This project <em>must</em> be run in an Oracle environment. As <code>project.php</code> makes queries of data stored inside <code>pokedex.sql</code>, ensure that you have imported this file to a live Oracle server that you've permission to access. Then update the data in <code>credentials.php</code>.</p>
-<h2>Executing the project</h2>
-<p>Open your computer's command terminal and <code>cd</code> to this project's directory/where <code>project.php</code> is stored. Enter <code>php -S localhost:8000/project.php</code> to execute the project.</p>
+<p>This Pokédex clone was my term project for CS 304: "Introduction to Databases" originally using an <strong>OracleSQL</strong> database to simulate a Pokédex. As of January 2022 the Pokédex uses <strong>MySQL</strong>."
+<h1>Setting up the database</h1>
+<p>Clone this repository to your desktop and enter the details of your development server of choice to <code>credentials.php</code> making sure beforehand your server can run MySQL. Import <code>pokedex.sql</code> to your MySQL database and execute <code>index.php</code>.</p>
+<h1>Using the Pokédex</h1>
 ![Pokédex in action](./55adcf9bb05ef238b106d2123156b23c.gif?raw=true)
-<p>On successful execution your terminal will inform you that the development server for <code>localhost:8000/project.php</code> has started. Open this address in your web browser and you will be able to access the data in <code>pokedex.sql</code> through the GUI which appears. From here you can view the Pokémon in the world. Make sure to click "Reset tables" on startup. Filter the Pokémon by name, ID, types, and abilities and compare them to other Pokémon. Or catch as many Pokémon as you like and similarly sort and organize through your collection as you please. When you have finished press <code>ctrl + C </code> into your command terminal to end the development server.</p>
+<p>Run the application in your web browser to access the Pokédex GUI. From here you can view and filter the database or manipulate your own collection of Pokédex by "catching", "renaming" or "releasing" them. Changes to this collection set will persist until the development server is terminated. You can also see the changes to your collection for yourself by checking the "Pokemon" table from your administrator view.</p>
+<h1>Future plans</h1>
+<p>I intend to further develop this application by containerizing it and scripting one-click deployment options to cloud servers like AWS or Azure. In the longer term I may also migrate the project to Laravel or a similar framework for a more structured application architecture.</p>

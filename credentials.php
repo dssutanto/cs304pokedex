@@ -1,5 +1,6 @@
 <?php
-    $username = NULL;       // Username to your Oracle server
-    $pass = NULL;           // Password to your Oracle server
-    $instance = NULL;       // The name of the Oracle instance to which you have imported "pokedex.sql"
+    $host = NULL;           // Host server name
+    $username = NULL;       // Username
+    $pass = NULL;           // Password
+    $instance = NULL;       // MySQL database name
 ?>
